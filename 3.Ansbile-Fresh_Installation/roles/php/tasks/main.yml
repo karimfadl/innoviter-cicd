@@ -1,0 +1,31 @@
+---
+- name: Update apt
+  apt: update_cache=yes
+
+- name: Install php and deps
+  apt: name={{ item }} state=present
+  with_items:
+    - php7.2 
+    - libapache2-mod-php7.2 
+    - php7.2-common 
+    - php7.2-mysql 
+    - php7.2-gmp 
+    - php7.2-curl 
+    - php7.2-intl 
+    - php7.2-mbstring 
+    - php7.2-xmlrpc 
+    - php7.2-gd 
+    - php7.2-bcmath 
+    - php7.2-json 
+    - php7.2-soap 
+    - php7.2-xml 
+    - php7.2-cli 
+    - php7.2-zip
+
+- name: Copy php configuration
+  template: src=php.ini dest=/etc/php/7.2/apache2/php.ini
+  notify: restart apache
+
+- name: Install Composer
+  shell: curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+

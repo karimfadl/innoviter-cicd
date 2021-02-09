@@ -1,0 +1,30 @@
+---
+- name: Clean Root Dir
+  file:
+    path: /var/www/html/index.html
+    state: absent
+
+- name: Copy Database backup Template
+  copy: src=../../../files/dump.sql dest=/tmp/dump.sql
+
+- name: Copy Website Files
+  copy: src=../../../files/app.zip dest=/var/www/html/
+
+- name: Exreact Website Files
+  shell: 
+    cmd: unzip app.zip
+    chdir: /var/www/html/
+
+- name: Copy Oxid configuration file
+  template: src=config.inc.php dest={{ rootdir_apache }}/config.inc.php
+
+- name: Run Composer for oxid app
+  shell:
+    cmd: composer update
+    chdir: /var/www/html/app
+
+- name: Import Database
+  shell: mysql -u {{ mysql_root_username }} -p'{{ mysql_root_password }}' --database {{ db_name }} < /tmp/dump.sql
+
+- name: Change ownership of oxid installation
+  file: path=/var/www/html/ owner={{ web_user }} group={{ web_grp }} state=directory recurse=yes

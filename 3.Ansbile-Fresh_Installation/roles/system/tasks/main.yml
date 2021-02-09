@@ -1,0 +1,26 @@
+---
+- name: Update The System Packages
+  apt: update_cache=yes
+
+- name: Ensure NTP (for time synchronization) is installed.
+  apt: name=ntp state=present
+
+- name: Ensure NTP is running.
+  service: name=ntp state=started enabled=yes
+
+- name: required packages
+  apt: name={{ item }} state=present
+  with_items:
+      - software-properties-common
+      - vim
+      - wget
+      - curl
+      - htop
+      - git
+      - python3-pip
+
+- name: Install (pyopenssl) python package
+  shell: pip3 install pyopenssl
+
+- name: Setting Server hostname
+  hostname: name={{ site_url }}

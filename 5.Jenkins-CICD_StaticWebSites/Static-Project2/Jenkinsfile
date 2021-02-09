@@ -1,0 +1,66 @@
+pipeline {
+
+	agent any
+
+   	environment {
+        DOCKER_IMAGE_NAME = "karimfadl/static-project2"
+ 	dockerRun = "docker run -d --name=project2 --network=nginx-proxy_static-projects $DOCKER_IMAGE_NAME:$BUILD_NUMBER"
+        dockerDel = "docker stop project2 && docker rm project2"
+	}
+
+	stages {
+
+		stage('Build Docker Image') {
+            		steps {
+                		script {
+                    			app = docker.build(DOCKER_IMAGE_NAME)
+                    			app.inside {
+                        			sh 'echo Hello, Project2!'
+                    			}
+                		}
+            		}
+
+		}
+
+
+       		 stage('Push Docker Image') {
+            		steps {
+                		script {
+                    			docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
+                        		app.push("${env.BUILD_NUMBER}")
+                        		app.push("latest")
+                    			}
+                		}
+            		}
+        	}
+
+
+        	stage('Deploy container to Staging Server') {
+			steps {
+  				sshagent (credentials: ['staging-server']) {
+                                        sh 'ssh -o StrictHostKeyChecking=no karim@116.203.178.17 ${dockerDel}'
+    					sh 'ssh -o StrictHostKeyChecking=no karim@116.203.178.17 ${dockerRun}'
+  				}
+        		}
+		}
+		
+
+		stage('Wait user approve') {
+                        steps {
+                                input "Ready to redirect traffic to Production?"
+              		}
+        	}
+
+
+                stage('Deploy container to Production Server') {
+                        steps {
+                                sshagent (credentials: ['production-server']) {
+                                        sh 'ssh -o StrictHostKeyChecking=no karim@94.130.170.184 ${dockerDel}'
+                                        sh 'ssh -o StrictHostKeyChecking=no karim@94.130.170.184 ${dockerRun}'
+                                }
+                        }
+                }
+
+
+	}
+}

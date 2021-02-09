@@ -1,0 +1,28 @@
+---
+- name: Create ssl directory
+  file: path=/etc/ssl/crts state=directory mode=0775
+
+- name: Generate Private key
+  openssl_privatekey: 
+     path: /etc/ssl/crts/{{ site_url }}.key
+     size: 2048
+
+- name: Generate CSR
+  openssl_csr: 
+     path: /etc/ssl/crts/{{ site_url }}.csr
+     privatekey_path: /etc/ssl/crts/{{ site_url }}.key 
+     common_name: "{{ site_url }}"
+     country_name: DE
+     email_address: mischa.zoeller@innoviter.com
+     organization_name: Innoviter
+
+- name: Generate a self signed certificate
+  openssl_certificate:
+     path: /etc/ssl/crts/{{ site_url }}.crt
+     privatekey_path: /etc/ssl/crts/{{ site_url }}.key
+     csr_path: /etc/ssl/crts/{{ site_url }}.csr
+     provider: selfsigned
+
+- name: Copy Apache configuration for oxid
+  template: src=app.conf dest=/etc/apache2/sites-available/app.conf
+  notify: restart apache

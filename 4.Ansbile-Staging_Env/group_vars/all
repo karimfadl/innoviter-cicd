@@ -1,0 +1,14 @@
+---
+# Web Server configuration.
+rootdir_apache: /var/www/html/app/source
+site_url: oxid.local
+web_user: www-data
+web_grp: www-data
+
+# DataBase configuration.
+db_host: localhost
+mysql_root_username: root
+mysql_root_password: root
+db_name: oxid
+db_user: admin
+db_password: oxid

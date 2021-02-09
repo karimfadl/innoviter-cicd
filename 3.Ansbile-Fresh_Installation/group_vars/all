@@ -1,0 +1,13 @@
+---
+# Web Server configuration.
+rootdir_apache: /var/www/html/source
+site_url: app.local
+web_user: www-data
+web_grp: www-data
+
+# DataBase configuration.
+db_host: localhost
+mysql_root_password: root
+db_name: app
+db_user: admin
+db_password: app

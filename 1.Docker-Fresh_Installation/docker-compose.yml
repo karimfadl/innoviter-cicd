@@ -1,0 +1,65 @@
+version: '3.2'
+services:
+
+  app_oxid6:
+    image: karimfadl/apache-php72
+    container_name: app_oxid6
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./oxideshop_ce:/var/www/html
+      - ./config/apache/app.conf:/etc/httpd/conf.d/app.conf
+    environment:
+      TZ: “Europe/Berlin”
+
+
+  db_oxid6:
+    image: mysql:5.7
+    container_name: db_oxid6
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_DATABASE: 'oxid6'
+      MYSQL_USER: 'admin'
+      MYSQL_PASSWORD: 'oxid6'
+      TZ: “Europe/Berlin”
+    volumes:
+      - ./databases/db_oxid6:/var/lib/mysql
+
+
+  composer_oxid6:
+    image: composer:1.8.4
+    volumes:
+      - ./oxideshop_ce:/var/www/html
+    working_dir: /var/www/html
+    container_name: composer_oxid6
+    command: update --ignore-platform-reqs
+    environment:
+      TZ: “Europe/Berlin”
+
+
+  oxid6_mailhog:
+    hostname: mailhog.oxid6.localhost
+    image: mailhog/mailhog:latest
+    container_name: mailhog_oxid6
+    restart: always
+    ports:
+      - 8025:8025
+    environment:
+      TZ: “Europe/Berlin”
+
+
+  oxid6_adminer:
+    image: adminer:latest
+    container_name: oxid6_adminer
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      ADMINER_DEFAULT_SERVER: db_oxid6
+    environment:
+      TZ: “Europe/Berlin”
+

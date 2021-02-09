@@ -1,0 +1,21 @@
+---
+- name: Clean Root Dir
+  file:
+    path: /var/www/html/index.html
+    state: absent
+
+- name: Download Oxid
+  git:
+    repo: https://github.com/OXID-eSales/oxideshop_ce.git
+    dest: /var/www/html/
+
+- name: Run Composer for oxid app
+  shell:
+    cmd: composer update
+    chdir: /var/www/html/
+
+- name: Copy Oxid Config File
+  command: cp {{ rootdir_apache }}/config.inc.php.dist {{ rootdir_apache }}/config.inc.php
+
+- name: Change ownership of oxid installation
+  file: path=/var/www/html/ owner={{ web_user }} group={{ web_grp }} state=directory recurse=yes
